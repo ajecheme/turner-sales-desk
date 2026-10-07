@@ -61,7 +61,9 @@ pre{white-space:pre-wrap;word-break:break-word;font:14px/1.45 ui-monospace,Menlo
 .doc .ex{margin-left:auto;font-size:10.5px;color:var(--muted);text-transform:uppercase}
 .tblwrap{overflow-x:auto;background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:8px}
 table.dt{width:100%;border-collapse:collapse;font-size:13.5px;min-width:760px}
-table.dt th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:9px 10px;border-bottom:1px solid var(--line);background:var(--chip)}
+table.dt th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);padding:9px 10px;border-bottom:1px solid var(--line);background:var(--chip);cursor:pointer;user-select:none;white-space:nowrap}
+table.dt th:hover{color:var(--ink)}
+table.dt th.on{color:var(--ink);font-weight:800}
 table.dt td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
 table.dt tr:last-child td{border-bottom:0}
 table.dt tr{cursor:pointer}
@@ -70,6 +72,7 @@ table.dt td.fn{font-weight:600;min-width:200px}
 table.dt td.fn .ex{display:inline-block;margin-left:6px;font-size:10px;color:var(--muted);text-transform:uppercase;font-weight:400}
 table.dt td.when{white-space:nowrap;color:var(--muted);font-size:12.5px;min-width:78px}
 table.dt td.sm{color:var(--muted);min-width:300px;font-size:13px}
+table.dt td.cg{color:var(--muted);white-space:nowrap;font-size:12.5px;min-width:92px}
 article.md{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;overflow-wrap:break-word;font-size:14.5px}
 article.md h1{font-size:20px;margin:0 0 10px}
 article.md h2{font-size:16px;text-transform:none;letter-spacing:0;color:var(--ink);margin:18px 0 6px;border-bottom:1px solid var(--line);padding-bottom:4px}
@@ -405,37 +408,51 @@ async function vProspects() {
 }
 /* ---------- Docs (the document library) ---------- */
 const REPO_NAME = { q4: "Q4 Reengagement", prospecting: "Prospecting", brain: "Turner Brain" };
-let DOCS = null, docQ = "", docPath = null;
+let DOCS = null, docQ = "", docCat = "", docSort = { by: "name", dir: 1 }, docPath = null;
 async function vDocs() {
   if (!DOCS) {
-    DOCS = need(await sb.from("documents").select("path,repo,title,category,ext,size_bytes,created_at,updated_at,summary").order("repo").order("category").order("title").limit(2000));
+    DOCS = need(await sb.from("documents").select("path,repo,title,category,sub_category,ext,size_bytes,created_at,updated_at,summary").order("title").limit(2000));
     counts.docs = DOCS.length; drawNav();
   }
   if (docPath) return vDocOpen();
-  $("view").innerHTML = `<div class="card"><input id="dQ" placeholder="Search ${DOCS.length} documents..." value="${esc(docQ)}"></div><div id="dList" class="dlist"></div>`;
+  const cats = [...new Set(DOCS.map((d) => d.category).filter(Boolean))].sort();
+  const opts = ['<option value="">All categories</option>']
+    .concat(cats.map((c) => `<option${c === docCat ? " selected" : ""}>${esc(c)}</option>`)).join("");
+  $("view").innerHTML = `<div class="card"><div class="two"><input id="dQ" placeholder="Search ${DOCS.length} documents..." value="${esc(docQ)}"><select id="dCat">${opts}</select></div><div class="meta" style="margin-top:6px">Click any column heading to sort. Click a row to open the file.</div></div><div id="dList"></div>`;
   drawDocList();
   $("dQ").oninput = (e) => { docQ = e.target.value; drawDocList(); };
-  $("dQ").onkeydown = (e) => { if (e.key === "Escape") { docQ = ""; e.target.value = ""; drawDocList(); } };
+  $("dCat").onchange = (e) => { docCat = e.target.value; drawDocList(); };
 }
+const DOC_COLS = [["name", "Name of the file"], ["category", "Category"], ["sub_category", "Sub-category"],
+                  ["created_at", "Date created"], ["updated_at", "Last modified"], ["summary", "Summary"]];
+function docValSort(d, by) { return by === "name" ? String(d.title || "").toLowerCase() : String(d[by] || "").toLowerCase(); }
 function drawDocList() {
   const q = docQ.trim().toLowerCase();
-  const list = q ? DOCS.filter((d) => (d.title + " " + d.path + " " + (d.summary || "")).toLowerCase().includes(q)) : DOCS;
-  const byRepo = {};
-  for (const d of list) (byRepo[d.repo] = byRepo[d.repo] || []).push(d);
-  let h = "";
-  for (const repo of Object.keys(byRepo)) {
-    const grp = byRepo[repo];
-    h += `<h2>${esc(REPO_NAME[repo] || repo)} (${grp.length})</h2><div class="tblwrap"><table class="dt"><thead><tr><th>Name of the file</th><th>Date created</th><th>Last modified</th><th>Summary</th></tr></thead><tbody>`;
-    for (const d of grp) {
-      h += `<tr data-p="${esc(d.path)}"><td class="fn">${esc(d.title)}<span class="ex">${esc((d.ext || "").replace(".", ""))}</span></td>`
-         + `<td class="when">${dfmt(d.created_at)}</td><td class="when">${dfmt(d.updated_at)}</td>`
-         + `<td class="sm">${esc(d.summary || "")}</td></tr>`;
-    }
-    h += `</tbody></table></div>`;
+  let list = DOCS.slice();
+  if (docCat) list = list.filter((d) => d.category === docCat);
+  if (q) list = list.filter((d) => (d.title + " " + d.path + " " + (d.summary || "") + " " + (d.category || "") + " " + (d.sub_category || "")).toLowerCase().includes(q));
+  list.sort((a, b) => {
+    const x = docValSort(a, docSort.by), y = docValSort(b, docSort.by);
+    return (x < y ? -1 : x > y ? 1 : 0) * docSort.dir;
+  });
+  let h = `<div class="tblwrap"><table class="dt"><thead><tr>`;
+  for (const [k, label] of DOC_COLS) h += `<th data-s="${k}" class="${docSort.by === k ? "on" : ""}">${label}${docSort.by === k ? (docSort.dir > 0 ? " \u25B2" : " \u25BC") : ""}</th>`;
+  h += `</tr></thead><tbody>`;
+  for (const d of list.slice(0, 400)) {
+    h += `<tr data-p="${esc(d.path)}"><td class="fn">${esc(d.title)}<span class="ex">${esc((d.ext || "").replace(".", ""))}</span></td>`
+       + `<td class="cg">${esc(d.category || "")}</td><td class="cg">${esc(d.sub_category || "")}</td>`
+       + `<td class="when">${dfmt(d.created_at)}</td><td class="when">${dfmt(d.updated_at)}</td>`
+       + `<td class="sm">${esc(d.summary || "")}</td></tr>`;
   }
+  h += `</tbody></table></div>`;
   if (!list.length) h = '<div class="empty">No matches.</div>';
-  else if (q) h = `<h2>${list.length} match${list.length === 1 ? "" : "es"}</h2>` + h;
+  else if (list.length > 400) h += `<div class="empty">Showing the first 400 of ${list.length}. Narrow with search or the category filter.</div>`;
   $("dList").innerHTML = h;
+  $("dList").querySelectorAll("th[data-s]").forEach((th) => (th.onclick = () => {
+    const k = th.dataset.s;
+    if (docSort.by === k) docSort.dir *= -1; else docSort = { by: k, dir: 1 };
+    drawDocList();
+  }));
   $("dList").querySelectorAll("tr[data-p]").forEach((el) => (el.onclick = () => { docPath = el.dataset.p; render(); }));
 }
 async function vDocOpen() {
