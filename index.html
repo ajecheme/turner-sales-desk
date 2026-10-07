@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turner Sales Desk — Documents</title>
+<script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+<style>
+  :root{
+    --bg:#f6f7f9; --panel:#fff; --ink:#1a1d21; --muted:#6b7280; --line:#e5e7eb;
+    --accent:#0f766e; --accent-soft:#ecfdf5; --warn:#b45309;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#0f1115; --panel:#161a20; --ink:#e6e8eb; --muted:#9aa4b2;
+           --line:#262c36; --accent:#2dd4bf; --accent-soft:#0d2b28; }
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{background:var(--bg);color:var(--ink);
+       font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif}
+  header{display:flex;align-items:center;gap:14px;padding:12px 18px;background:var(--panel);
+         border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+  header h1{font-size:15px;margin:0;font-weight:650;letter-spacing:-.01em}
+  header .who{margin-left:auto;font-size:12.5px;color:var(--muted)}
+  header button{font:inherit;font-size:13px;padding:6px 12px;border:1px solid var(--line);
+                background:transparent;color:var(--ink);border-radius:7px;cursor:pointer}
+  header button:hover{border-color:var(--accent);color:var(--accent)}
+  #app{display:grid;grid-template-columns:310px 1fr;height:calc(100% - 49px)}
+  aside{border-right:1px solid var(--line);background:var(--panel);overflow:auto;padding:12px}
+  aside input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;
+              background:var(--bg);color:var(--ink);font:inherit;font-size:13.5px;margin-bottom:10px}
+  .repo{margin:14px 0 6px;font-size:11px;font-weight:700;letter-spacing:.09em;
+        text-transform:uppercase;color:var(--accent)}
+  .cat{margin:9px 0 3px;font-size:11.5px;font-weight:600;color:var(--muted)}
+  a.doc{display:flex;gap:7px;align-items:baseline;padding:5px 8px;border-radius:6px;
+        font-size:13.2px;color:var(--ink);text-decoration:none;cursor:pointer}
+  a.doc:hover{background:var(--accent-soft)}
+  a.doc.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+  a.doc .ext{margin-left:auto;font-size:10px;color:var(--muted);text-transform:uppercase}
+  main{overflow:auto;padding:26px 34px 80px}
+  .crumb{font-size:12px;color:var(--muted);margin-bottom:14px}
+  .bar{display:flex;gap:9px;margin-bottom:18px;flex-wrap:wrap}
+  .bar a,.bar span.badge{font-size:12.5px;padding:5px 11px;border-radius:999px;
+        border:1px solid var(--line);text-decoration:none;color:var(--ink)}
+  .bar a{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .bar span.badge{color:var(--muted)}
+  article{background:var(--panel);border:1px solid var(--line);border-radius:11px;
+          padding:30px 38px;max-width:900px}
+  article h1,article h2,article h3{letter-spacing:-.015em;line-height:1.25}
+  article h1{font-size:25px;margin:0 0 14px}
+  article h2{font-size:19px;margin:28px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+  article h3{font-size:16px;margin:20px 0 8px}
+  article table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.6px}
+  article th,article td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+  article th{background:var(--accent-soft)}
+  article code{background:var(--bg);padding:1.5px 5px;border-radius:4px;font-size:.9em}
+  article pre{background:var(--bg);padding:13px;border-radius:8px;overflow:auto;
+              border:1px solid var(--line)}
+  article blockquote{margin:14px 0;padding:2px 16px;border-left:3px solid var(--accent);color:var(--muted)}
+  article a{color:var(--accent)}
+  iframe.pdf{width:100%;height:calc(100vh - 210px);border:1px solid var(--line);border-radius:10px;background:#fff}
+  .empty{color:var(--muted);font-size:14px}
+  #login{max-width:370px;margin:12vh auto;background:var(--panel);border:1px solid var(--line);
+         border-radius:13px;padding:30px}
+  #login h1{font-size:19px;margin:0 0 6px}
+  #login p{color:var(--muted);font-size:13.4px;margin:0 0 18px}
+  #login input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;
+               background:var(--bg);color:var(--ink);font:inherit;margin-bottom:11px}
+  #login button{width:100%;padding:10px;border:0;border-radius:8px;background:var(--accent);
+                color:#fff;font:inherit;font-weight:600;cursor:pointer}
+  .row{display:flex;gap:8px;margin-top:14px}
+  .row input{margin:0}
+  .row button{width:auto;white-space:nowrap}
+  .msg{font-size:13px;margin-top:12px;color:var(--accent)}
+  .err{color:#dc2626}
+</style>
+</head>
+<body>
+<header>
+  <h1>Turner Sales Desk · Documents</h1>
+  <span class="who" id="who"></span>
+  <button id="setpw" style="display:none">Set password</button>
+  <button id="out" style="display:none">Sign out</button>
+</header>
+
+<div id="login">
+  <h1>Sign in</h1>
+  <p>Enter your Turner email. Use your password once you've set one, or request a 6-digit code.</p>
+  <input id="email" type="email" placeholder="you@turnerpest.com" autocomplete="email">
+  <input id="pw" type="password" placeholder="Password (once set)" autocomplete="current-password">
+  <button id="send">Sign in</button>
+  <div class="row">
+    <input id="code" inputmode="numeric" autocomplete="one-time-code" placeholder="6-digit code">
+    <button id="ver">Verify code</button>
+  </div>
+  <div class="msg" id="lmsg"></div>
+</div>
+
+<div id="app" style="display:none">
+  <aside>
+    <input id="q" type="search" placeholder="Search documents…">
+    <div id="tree"></div>
+  </aside>
+  <main id="main">
+    <p class="empty">Pick a document on the left, or search.</p>
+  </main>
+</div>
+
+<script>
+const SB_URL = "https://mbfujqeocadwpwqavjkc.supabase.co";
+const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1iZnVqcWVvY2Fkd3B3cWF2amtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyMjcxNzAsImV4cCI6MjEwNjgwMzE3MH0.lLbaNBK_zAluBUbWMxowG8ye8kBdvVlsRnytNsm-iNM";
+let client, DOCS = [], CUR = null;
+const esc = s => String(s??"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+async function sb(path, opts={}){
+  const {data:{session}} = await client.auth.getSession();
+  const r = await fetch(SB_URL + path, {...opts, headers:{
+    "apikey": SB_KEY, "Authorization": "Bearer " + (session?.access_token || SB_KEY),
+    ...(opts.headers||{})}});
+  return r;
+}
+
+async function load(){
+  const r = await sb("/rest/v1/documents?select=*&order=repo,category,title&limit=5000");
+  if(!r.ok){ document.getElementById("tree").innerHTML =
+    `<p class="empty err">Could not load index (${r.status}).</p>`; return; }
+  DOCS = await r.json();
+  renderTree();
+}
+
+function renderTree(){
+  const q = document.getElementById("q").value.trim().toLowerCase();
+  const list = q ? DOCS.filter(d => (d.title+" "+d.path).toLowerCase().includes(q)) : DOCS;
+  const byRepo = {};
+  for(const d of list) ((byRepo[d.repo] ||= {})[d.category || "—"] ||= []).push(d);
+  const names = {q4:"Q4 Reengagement", prospecting:"Prospecting", brain:"Turner Brain"};
+  let h = list.length ? "" : `<p class="empty">No matches.</p>`;
+  for(const [repo, cats] of Object.entries(byRepo)){
+    h += `<div class="repo">${esc(names[repo] || repo)}</div>`;
+    for(const [cat, files] of Object.entries(cats).sort()){
+      h += `<div class="cat">${esc(cat)} · ${files.length}</div>`;
+      for(const f of files.sort((a,b)=>a.title.localeCompare(b.title)))
+        h += `<a class="doc${CUR===f.path?" on":""}" data-p="${esc(f.path)}" data-e="${esc(f.ext)}"
+                title="${esc(f.path)}">${esc(f.title)}<span class="ext">${esc((f.ext||"").replace(".",""))}</span></a>`;
+    }
+  }
+  const t = document.getElementById("tree");
+  t.innerHTML = h;
+  t.querySelectorAll("a.doc").forEach(a => a.onclick = () => open(a.dataset.p, a.dataset.e));
+}
+
+async function open(path, ext){
+  CUR = path;
+  renderTree();
+  const main = document.getElementById("main");
+  main.innerHTML = `<p class="empty">Loading…</p>`;
+  const meta = DOCS.find(d => d.path === path) || {};
+  const r = await sb(`/storage/v1/object/docs/${path.split("/").map(encodeURIComponent).join("/")}`);
+  if(!r.ok){ main.innerHTML = `<p class="empty err">Could not load file (${r.status}).</p>`; return; }
+  const bar = `<div class="bar">
+      <a href="#" id="dl">↓ Download</a>
+      <span class="badge">${esc((meta.size_bytes/1024).toFixed(0))} KB</span>
+      <span class="badge">${esc(path)}</span>
+      <span class="badge">updated ${esc((meta.updated_at||"").slice(0,10))}</span>
+    </div>`;
+  if(ext === ".md" || ext === ".txt"){
+    const txt = await r.text();
+    main.innerHTML = `<div class="crumb">${esc(path)}</div>${bar}<article id="art"></article>`;
+    document.getElementById("art").innerHTML = DOMPurify.sanitize(marked.parse(txt));
+  } else if(ext === ".pdf"){
+    const b = await r.blob();
+    main.innerHTML = `<div class="crumb">${esc(path)}</div>${bar}
+      <iframe class="pdf" src="${URL.createObjectURL(b)}"></iframe>`;
+  } else {
+    main.innerHTML = `<div class="crumb">${esc(path)}</div>${bar}
+      <article><p>This file type isn't previewable in the browser. Use Download.</p></article>`;
+  }
+  document.getElementById("dl").onclick = async (e) => {
+    e.preventDefault();
+    const rr = await sb(`/storage/v1/object/docs/${path.split("/").map(encodeURIComponent).join("/")}`);
+    const b = await rr.blob();
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(b); a.download = path.split("/").pop();
+    a.click(); URL.revokeObjectURL(a.href);
+  };
+}
+
+function showApp(user){
+  document.getElementById("login").style.display = "none";
+  document.getElementById("app").style.display = "grid";
+  document.getElementById("who").textContent = user?.email || "";
+  document.getElementById("out").style.display = "inline-block";
+  document.getElementById("setpw").style.display = "inline-block";
+  load();
+}
+
+(async () => {
+  const {createClient} = await import("https://esm.sh/@supabase/supabase-js@2");
+  client = createClient(SB_URL, SB_KEY);
+  const {data:{session}} = await client.auth.getSession();
+  if(session) showApp(session.user);
+  document.getElementById("out").onclick = async () => { await client.auth.signOut(); location.reload(); };
+  const say=(t,bad)=>{const m=document.getElementById("lmsg");m.className="msg"+(bad?" err":"");m.textContent=t;};
+  document.getElementById("send").onclick = async () => {
+    const email=document.getElementById("email").value.trim();
+    const pw=document.getElementById("pw").value;
+    if(!email){ say("Enter your email.",1); return; }
+    if(pw){
+      const {error}=await client.auth.signInWithPassword({email,password:pw});
+      say(error?error.message:"Signing in…",!!error);
+    }else{
+      const {error}=await client.auth.signInWithOtp({email});
+      say(error?error.message:"Check your inbox for the 6-digit code.",!!error);
+    }
+  };
+  document.getElementById("ver").onclick = async () => {
+    const email=document.getElementById("email").value.trim();
+    const token=document.getElementById("code").value.trim();
+    if(!email||!token){ say("Enter your email and the code.",1); return; }
+    const {error}=await client.auth.verifyOtp({email,token,type:"email"});
+    if(error) say(error.message,1);
+  };
+  document.getElementById("setpw").onclick = async () => {
+    const p=prompt("Choose a password for this account (min 8 characters):");
+    if(!p) return;
+    const {error}=await client.auth.updateUser({password:p});
+    alert(error?error.message:"Password set. Next time, sign in with email + password.");
+  };
+  document.getElementById("q").oninput = renderTree;
+  client.auth.onAuthStateChange((_e, s) => { if(s) showApp(s.user); });
+})();
+</script>
+</body>
+</html>
