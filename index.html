@@ -2,234 +2,454 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Turner Sales Desk — Documents</title>
-<script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sales Desk">
+<meta name="theme-color" content="#14331F">
+<title>Sales Desk</title>
 <style>
-  :root{
-    --bg:#f6f7f9; --panel:#fff; --ink:#1a1d21; --muted:#6b7280; --line:#e5e7eb;
-    --accent:#0f766e; --accent-soft:#ecfdf5; --warn:#b45309;
-  }
-  @media (prefers-color-scheme: dark){
-    :root{ --bg:#0f1115; --panel:#161a20; --ink:#e6e8eb; --muted:#9aa4b2;
-           --line:#262c36; --accent:#2dd4bf; --accent-soft:#0d2b28; }
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%;margin:0}
-  body{background:var(--bg);color:var(--ink);
-       font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif}
-  header{display:flex;align-items:center;gap:14px;padding:12px 18px;background:var(--panel);
-         border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
-  header h1{font-size:15px;margin:0;font-weight:650;letter-spacing:-.01em}
-  header .who{margin-left:auto;font-size:12.5px;color:var(--muted)}
-  header button{font:inherit;font-size:13px;padding:6px 12px;border:1px solid var(--line);
-                background:transparent;color:var(--ink);border-radius:7px;cursor:pointer}
-  header button:hover{border-color:var(--accent);color:var(--accent)}
-  #app{display:grid;grid-template-columns:310px 1fr;height:calc(100% - 49px)}
-  aside{border-right:1px solid var(--line);background:var(--panel);overflow:auto;padding:12px}
-  aside input{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;
-              background:var(--bg);color:var(--ink);font:inherit;font-size:13.5px;margin-bottom:10px}
-  .repo{margin:14px 0 6px;font-size:11px;font-weight:700;letter-spacing:.09em;
-        text-transform:uppercase;color:var(--accent)}
-  .cat{margin:9px 0 3px;font-size:11.5px;font-weight:600;color:var(--muted)}
-  a.doc{display:flex;gap:7px;align-items:baseline;padding:5px 8px;border-radius:6px;
-        font-size:13.2px;color:var(--ink);text-decoration:none;cursor:pointer}
-  a.doc:hover{background:var(--accent-soft)}
-  a.doc.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
-  a.doc .ext{margin-left:auto;font-size:10px;color:var(--muted);text-transform:uppercase}
-  main{overflow:auto;padding:26px 34px 80px}
-  .crumb{font-size:12px;color:var(--muted);margin-bottom:14px}
-  .bar{display:flex;gap:9px;margin-bottom:18px;flex-wrap:wrap}
-  .bar a,.bar span.badge{font-size:12.5px;padding:5px 11px;border-radius:999px;
-        border:1px solid var(--line);text-decoration:none;color:var(--ink)}
-  .bar a{background:var(--accent);color:#fff;border-color:var(--accent)}
-  .bar span.badge{color:var(--muted)}
-  article{background:var(--panel);border:1px solid var(--line);border-radius:11px;
-          padding:30px 38px;max-width:900px}
-  article h1,article h2,article h3{letter-spacing:-.015em;line-height:1.25}
-  article h1{font-size:25px;margin:0 0 14px}
-  article h2{font-size:19px;margin:28px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line)}
-  article h3{font-size:16px;margin:20px 0 8px}
-  article table{border-collapse:collapse;width:100%;margin:14px 0;font-size:13.6px}
-  article th,article td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
-  article th{background:var(--accent-soft)}
-  article code{background:var(--bg);padding:1.5px 5px;border-radius:4px;font-size:.9em}
-  article pre{background:var(--bg);padding:13px;border-radius:8px;overflow:auto;
-              border:1px solid var(--line)}
-  article blockquote{margin:14px 0;padding:2px 16px;border-left:3px solid var(--accent);color:var(--muted)}
-  article a{color:var(--accent)}
-  iframe.pdf{width:100%;height:calc(100vh - 210px);border:1px solid var(--line);border-radius:10px;background:#fff}
-  .empty{color:var(--muted);font-size:14px}
-  #login{max-width:370px;margin:12vh auto;background:var(--panel);border:1px solid var(--line);
-         border-radius:13px;padding:30px}
-  #login h1{font-size:19px;margin:0 0 6px}
-  #login p{color:var(--muted);font-size:13.4px;margin:0 0 18px}
-  #login input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;
-               background:var(--bg);color:var(--ink);font:inherit;margin-bottom:11px}
-  #login button{width:100%;padding:10px;border:0;border-radius:8px;background:var(--accent);
-                color:#fff;font:inherit;font-weight:600;cursor:pointer}
-  .row{display:flex;gap:8px;margin-top:14px}
-  .row input{margin:0}
-  .row button{width:auto;white-space:nowrap}
-  .msg{font-size:13px;margin-top:12px;color:var(--accent)}
-  .err{color:#dc2626}
+:root{--green:#14331F;--green2:#1f4a2e;--gold:#A5831B;--red:#8E2A21;--bg:#f4f5f1;--card:#fff;--ink:#17201a;--muted:#5d675f;--line:#dfe3da;--chip:#e9eee6}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1511;--card:#18211b;--ink:#eef2ec;--muted:#9aa69c;--line:#2a362d;--chip:#223026;--gold:#d2ad3f;--red:#e0766b}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+header{background:var(--green);color:#fff;padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5}
+header h1{font-size:18px;margin:0;font-weight:650;letter-spacing:.2px}
+header h1 span{color:#d9bd5c}
+header button{background:transparent;border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:8px;padding:6px 10px;font-size:13px}
+main{max-width:860px;margin:0 auto;padding:14px 16px calc(env(safe-area-inset-bottom) + 92px)}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:5}
+nav button{flex:1;background:none;border:0;color:var(--muted);padding:10px 1px 9px;font-size:11px;font-weight:600;position:relative}
+nav button.on{color:var(--green)}
+@media (prefers-color-scheme:dark){nav button.on{color:var(--gold)}}
+nav button b{display:block;font-size:17px;font-weight:700;line-height:1.2}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 8px;text-align:center}
+.tile b{display:block;font-size:22px;font-weight:700}
+.tile small{color:var(--muted);font-size:11.5px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin:18px 2px 8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px}
+.card h3{margin:0 0 2px;font-size:16px}
+.meta{color:var(--muted);font-size:13.5px}
+.row{display:flex;gap:10px;align-items:flex-start}
+.grow{flex:1;min-width:0}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 2px}
+.chip{background:var(--chip);border-radius:999px;padding:2px 9px;font-size:12px;color:var(--ink)}
+.chip.hot{background:var(--red);color:#fff}
+.chip.gold{background:var(--gold);color:#fff}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+button.b,a.b{appearance:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:9px;padding:8px 12px;font-size:14px;font-weight:600;text-decoration:none;cursor:pointer}
+button.b.p,a.b.p{background:var(--green);border-color:var(--green);color:#fff}
+button.b.d{color:var(--red)}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 11px}
+textarea{min-height:150px;resize:vertical}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+.add{display:grid;grid-template-columns:1fr auto;gap:8px}
+.add2{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-top:8px}
+.check{width:26px;height:26px;border-radius:50%;border:2px solid var(--muted);background:none;flex:none;margin-top:1px;cursor:pointer}
+.late{color:var(--red);font-weight:600}
+.empty{color:var(--muted);text-align:center;padding:26px 10px}
+.filters{display:flex;gap:8px;margin-bottom:10px}
+pre{white-space:pre-wrap;word-break:break-word;font:14px/1.45 ui-monospace,Menlo,monospace;background:var(--chip);border-radius:8px;padding:10px;margin:8px 0 0}
+#login{max-width:380px;margin:9vh auto;padding:0 18px}
+#login h1{font-size:24px;margin:0 0 4px}
+#msg{margin-top:12px;font-size:14px;color:var(--muted)}
+.form{border-top:1px solid var(--line);margin-top:10px;padding-top:4px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dlist{display:flex;flex-direction:column;gap:6px}
+.doc{display:flex;gap:8px;align-items:baseline;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14.5px;cursor:pointer}
+.doc .ex{margin-left:auto;font-size:10.5px;color:var(--muted);text-transform:uppercase}
+article.md{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;overflow-wrap:break-word;font-size:14.5px}
+article.md h1{font-size:20px;margin:0 0 10px}
+article.md h2{font-size:16px;text-transform:none;letter-spacing:0;color:var(--ink);margin:18px 0 6px;border-bottom:1px solid var(--line);padding-bottom:4px}
+article.md h3{font-size:14.5px;margin:14px 0 4px}
+article.md table{border-collapse:collapse;width:100%;font-size:13px;margin:8px 0;display:block;overflow-x:auto}
+article.md th,article.md td{border:1px solid var(--line);padding:5px 7px;text-align:left;vertical-align:top}
+article.md th{background:var(--chip)}
+article.md code{background:var(--chip);padding:1px 4px;border-radius:4px;font-size:.9em}
+article.md pre{background:var(--chip);padding:9px;border-radius:8px;overflow:auto}
+article.md blockquote{margin:10px 0;padding:2px 12px;border-left:3px solid var(--gold);color:var(--muted)}
+article.md a{color:var(--green)}
+article.md img{max-width:100%}
+iframe.pdf{width:100%;height:70vh;border:1px solid var(--line);border-radius:10px;background:#fff}
+.hide{display:none!important}
 </style>
 </head>
 <body>
-<header>
-  <h1>Turner Sales Desk · Documents</h1>
-  <span class="who" id="who"></span>
-  <button id="setpw" style="display:none">Set password</button>
-  <button id="out" style="display:none">Sign out</button>
-</header>
-
-<div id="login">
-  <h1>Sign in</h1>
-  <p>Enter your Turner email. Use your password once you've set one, or request a 6-digit code.</p>
-  <input id="email" type="email" placeholder="you@turnerpest.com" autocomplete="email">
-  <input id="pw" type="password" placeholder="Password (once set)" autocomplete="current-password">
-  <button id="send">Sign in</button>
-  <div class="row">
-    <input id="code" inputmode="numeric" autocomplete="one-time-code" placeholder="6-digit code">
-    <button id="ver">Verify code</button>
-  </div>
-  <div class="msg" id="lmsg"></div>
+<div id="login" class="hide">
+  <h1>Sales Desk</h1>
+  <div class="meta">Turner commercial accounts. Private.</div>
+  <label for="em">Email</label><input id="em" type="email" autocomplete="username" inputmode="email">
+  <label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password">
+  <div class="btns"><button class="b p" id="signin">Sign in</button><button class="b" id="signup">Create account</button></div>
+  <div id="msg"></div>
 </div>
-
-<div id="app" style="display:none">
-  <aside>
-    <input id="q" type="search" placeholder="Search documents…">
-    <div id="tree"></div>
-  </aside>
-  <main id="main">
-    <p class="empty">Pick a document on the left, or search.</p>
-  </main>
+<div id="app" class="hide">
+  <header><h1>Sales <span>Desk</span></h1><div><button id="refresh">Refresh</button> <button id="signout">Sign out</button></div></header>
+  <main id="view"></main>
+  <nav id="nav"></nav>
 </div>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
 <script>
 const SB_URL = "https://mbfujqeocadwpwqavjkc.supabase.co";
-const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1iZnVqcWVvY2Fkd3B3cWF2amtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyMjcxNzAsImV4cCI6MjEwNjgwMzE3MH0.lLbaNBK_zAluBUbWMxowG8ye8kBdvVlsRnytNsm-iNM";
-let client, DOCS = [], CUR = null;
-const esc = s => String(s??"").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const SB_KEY = "sb_publishable_YKXiHpTv3yyI73rbzg6i9A_kd3zWk3g";
+const BCC = "46780448@bcc.hubspot.com";
+const sb = supabase.createClient(SB_URL, SB_KEY);
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const today = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
+const fmt = (d) => d ? new Date(d + "T12:00:00").toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "";
+const TABS = [["today", "Today"], ["deals", "Deals"], ["leads", "Leads"], ["drafts", "Drafts"], ["hubspot", "HubSpot"], ["prospects", "Prospects"], ["docs", "Docs"]];
+let tab = localStorage.getItem("tab") || "today";
+let counts = {};
+let leadFilter = { county: "", kind: "" };
+let prospectFilter = "";
 
-async function sb(path, opts={}){
-  const {data:{session}} = await client.auth.getSession();
-  const r = await fetch(SB_URL + path, {...opts, headers:{
-    "apikey": SB_KEY, "Authorization": "Bearer " + (session?.access_token || SB_KEY),
-    ...(opts.headers||{})}});
-  return r;
+function say(t) { $("msg").textContent = t; }
+
+async function boot() {
+  const { data } = await sb.auth.getSession();
+  show(!!data.session);
+  sb.auth.onAuthStateChange((_e, s) => show(!!s));
 }
-
-async function load(){
-  const r = await sb("/rest/v1/documents?select=*&order=repo,category,title&limit=5000");
-  if(!r.ok){ document.getElementById("tree").innerHTML =
-    `<p class="empty err">Could not load index (${r.status}).</p>`; return; }
-  DOCS = await r.json();
-  renderTree();
+function show(authed) {
+  $("login").classList.toggle("hide", authed);
+  $("app").classList.toggle("hide", !authed);
+  if (authed) render();
 }
+$("signin").onclick = async () => {
+  say("Signing in...");
+  const { error } = await sb.auth.signInWithPassword({ email: $("em").value.trim(), password: $("pw").value });
+  say(error ? error.message : "");
+};
+$("signup").onclick = async () => {
+  if ($("pw").value.length < 10) return say("Use a password of at least 10 characters.");
+  say("Creating account...");
+  const { error } = await sb.auth.signUp({ email: $("em").value.trim(), password: $("pw").value });
+  say(error ? error.message : "Check your email and open the confirmation link. The page it lands on may fail to load; that is fine. Then come back here and sign in.");
+};
+$("signout").onclick = () => sb.auth.signOut();
+$("refresh").onclick = () => render();
 
-function renderTree(){
-  const q = document.getElementById("q").value.trim().toLowerCase();
-  const list = q ? DOCS.filter(d => (d.title+" "+d.path).toLowerCase().includes(q)) : DOCS;
-  const byRepo = {};
-  for(const d of list) ((byRepo[d.repo] ||= {})[d.category || "—"] ||= []).push(d);
-  const names = {q4:"Q4 Reengagement", prospecting:"Prospecting", brain:"Turner Brain"};
-  let h = list.length ? "" : `<p class="empty">No matches.</p>`;
-  for(const [repo, cats] of Object.entries(byRepo)){
-    h += `<div class="repo">${esc(names[repo] || repo)}</div>`;
-    for(const [cat, files] of Object.entries(cats).sort()){
-      h += `<div class="cat">${esc(cat)} · ${files.length}</div>`;
-      for(const f of files.sort((a,b)=>a.title.localeCompare(b.title)))
-        h += `<a class="doc${CUR===f.path?" on":""}" data-p="${esc(f.path)}" data-e="${esc(f.ext)}"
-                title="${esc(f.path)}">${esc(f.title)}<span class="ext">${esc((f.ext||"").replace(".",""))}</span></a>`;
-    }
+async function loadCounts() {
+  const t = today();
+  const q = (tbl, f) => f(sb.from(tbl).select("*", { count: "exact", head: true })).then((r) => r.count || 0);
+  const [due, drafts, hub, leads, deals] = await Promise.all([
+    q("tasks", (x) => x.eq("status", "open").lte("due_date", t)),
+    q("drafts", (x) => x.eq("status", "pending")),
+    q("hubspot_queue", (x) => x.eq("status", "pending")),
+    q("signals", (x) => x.eq("status", "new")),
+    q("deals", (x) => x.eq("closed", false)),
+  ]);
+  counts = { today: due, drafts, hubspot: hub, leads, deals };
+  drawNav();
+}
+function drawNav() {
+  $("nav").innerHTML = TABS.map(([k, label]) => `<button data-t="${k}" class="${k === tab ? "on" : ""}"><b>${counts[k] == null ? "&middot;" : counts[k]}</b>${label}</button>`).join("");
+  $("nav").querySelectorAll("button").forEach((b) => (b.onclick = () => { tab = b.dataset.t; localStorage.setItem("tab", tab); render(); }));
+}
+async function render() {
+  drawNav();
+  $("view").innerHTML = '<div class="empty">Loading...</div>';
+  try { await ({ today: vToday, deals: vDeals, leads: vLeads, drafts: vDrafts, hubspot: vHub, prospects: vProspects, docs: vDocs }[tab] || vToday)(); }
+  catch (e) { $("view").innerHTML = `<div class="empty">Could not load: ${esc(e.message || e)}</div>`; }
+  loadCounts();
+}
+function need(r) { if (r.error) throw r.error; return r.data || []; }
+
+/* ---------- Today ---------- */
+const PORTAL = BCC.split("@")[0];
+function linkify(s) {
+  return esc(s).replace(/(https?:\/\/[^\s<)]+)/g, (u) => `<a href="${u}" target="_blank" rel="noopener">${u.length > 46 ? u.slice(0, 44) + "\u2026" : u}</a>`);
+}
+function relatedLinks(co, d) {
+  const out = [];
+  const dealUrl = d && (d.hubspot_url || (d.hubspot_deal_id ? `https://app.hubspot.com/contacts/${PORTAL}/record/0-3/${d.hubspot_deal_id}` : null));
+  if (dealUrl) out.push(`<a class="b" href="${esc(dealUrl)}" target="_blank" rel="noopener">HubSpot deal</a>`);
+  if (co && co.hubspot_company_id) out.push(`<a class="b" href="https://app.hubspot.com/contacts/${PORTAL}/record/0-2/${esc(co.hubspot_company_id)}" target="_blank" rel="noopener">HubSpot company</a>`);
+  if (co && co.pestpac_account) out.push(`<a class="b" href="https://app.antcx.pestpac.com/location/detail.asp?LocationID=${encodeURIComponent(co.pestpac_account)}" target="_blank" rel="noopener">PestPac</a>`);
+  return out.length ? `<div class="btns">${out.join("")}</div>` : "";
+}
+async function vToday() {
+  const t = today();
+  const tasks = need(await sb.from("tasks").select("*, companies(name,pestpac_account,hubspot_company_id)").eq("status", "open").order("due_date", { ascending: true, nullsFirst: false }).limit(200));
+  const ids = [...new Set(tasks.map((x) => x.deal_id).filter(Boolean))];
+  const deals = ids.length ? need(await sb.from("deals").select("id,name,stage,hubspot_deal_id,hubspot_url").in("id", ids)) : [];
+  const dById = new Map(deals.map((d) => [d.id, d]));
+  const drafts = need(await sb.from("drafts").select("company_id,to_email,subject,body").in("status", ["pending", "approved"]).limit(300));
+  const dByCo = new Map();
+  for (const d of drafts) if (d.company_id && !dByCo.has(d.company_id)) dByCo.set(d.company_id, d);
+  const groups = [["Overdue", tasks.filter((x) => x.due_date && x.due_date < t)], ["Today", tasks.filter((x) => x.due_date === t)], ["Coming up", tasks.filter((x) => x.due_date && x.due_date > t)], ["No date", tasks.filter((x) => !x.due_date)]];
+  let h = `<div class="card"><div class="add"><input id="tTitle" placeholder="Add a task, e.g. Call Scott at Stetson about renewal"><button class="b p" id="tAdd">Add</button></div>
+    <div class="add2"><input id="tDue" type="date" value="${t}"><select id="tKind">${["todo", "call", "email", "follow_up", "visit", "inspection", "proposal", "linkedin", "hubspot_log"].map((k) => `<option>${k}</option>`).join("")}</select><span></span></div></div>`;
+  let any = false;
+  for (const [name, list] of groups) {
+    if (!list.length) continue; any = true;
+    h += `<h2>${name} (${list.length})</h2>` + list.map((x) => {
+      const co = x.companies, d = dById.get(x.deal_id), dr = dByCo.get(x.company_id);
+      return `<div class="card row"><button class="check" data-done="${x.id}" aria-label="Mark done"></button><div class="grow"><h3>${esc(x.title)}</h3>
+      <div class="meta">${co ? esc(co.name) + " &middot; " : ""}${esc(x.kind)}${x.due_date ? ` &middot; <span class="${x.due_date < t ? "late" : ""}">${fmt(x.due_date)}</span>` : ""}${x.created_by && x.created_by !== "abel" ? " &middot; from " + esc(x.created_by) : ""}</div>
+      ${d ? `<div class="meta" style="margin-top:4px"><b>Related deal:</b> ${esc(d.name || "")}${d.stage ? " &middot; " + esc(d.stage.replace(/_/g, " ")) : ""}</div>` : ""}
+      ${relatedLinks(co, d)}
+      ${x.notes ? `<div class="meta" style="margin-top:6px">${linkify(x.notes)}</div>` : ""}
+      ${dr ? `<div style="margin-top:8px"><label>Draft response${dr.to_email ? " to " + esc(dr.to_email) : ""}${dr.subject ? " &middot; " + esc(dr.subject) : ""}</label><textarea data-draft="${x.id}" style="min-height:96px">${esc(dr.body || "")}</textarea><div class="btns"><button class="b p" data-copy="${x.id}">Copy draft</button><button class="b" data-mail="${x.id}">Open in Mail</button></div></div>` : ""}
+      </div></div>`; }).join("");
   }
-  const t = document.getElementById("tree");
-  t.innerHTML = h;
-  t.querySelectorAll("a.doc").forEach(a => a.onclick = () => open(a.dataset.p, a.dataset.e));
+  if (!any) h += '<div class="empty">Nothing open. Add a task above, or message Hermes.</div>';
+  $("view").innerHTML = h;
+  $("tAdd").onclick = async () => {
+    const title = $("tTitle").value.trim(); if (!title) return;
+    need(await sb.from("tasks").insert({ title, due_date: $("tDue").value || null, kind: $("tKind").value }).select());
+    render();
+  };
+  $("tTitle").onkeydown = (e) => { if (e.key === "Enter") $("tAdd").click(); };
+  $("view").querySelectorAll("[data-done]").forEach((b) => (b.onclick = async () => {
+    need(await sb.from("tasks").update({ status: "done", completed_at: new Date().toISOString() }).eq("id", b.dataset.done).select());
+    render();
+  }));
+  $("view").querySelectorAll("[data-copy]").forEach((b) => (b.onclick = async () => {
+    const ta = $("view").querySelector(`[data-draft="${b.dataset.copy}"]`); if (!ta) return;
+    await navigator.clipboard.writeText(ta.value); b.textContent = "Copied";
+  }));
+  $("view").querySelectorAll("[data-mail]").forEach((b) => (b.onclick = () => {
+    const id = b.dataset.mail, ta = $("view").querySelector(`[data-draft="${id}"]`); if (!ta) return;
+    const dr = dByCo.get((tasks.find((x) => x.id === id) || {}).company_id) || {};
+    location.href = `mailto:${encodeURIComponent(dr.to_email || "")}?bcc=${encodeURIComponent(BCC)}&subject=${encodeURIComponent(dr.subject || "")}&body=${encodeURIComponent(ta.value)}`;
+  }));
 }
 
-async function open(path, ext){
-  CUR = path;
-  renderTree();
-  const main = document.getElementById("main");
-  main.innerHTML = `<p class="empty">Loading…</p>`;
-  const meta = DOCS.find(d => d.path === path) || {};
-  const r = await sb(`/storage/v1/object/docs/${path.split("/").map(encodeURIComponent).join("/")}`);
-  if(!r.ok){ main.innerHTML = `<p class="empty err">Could not load file (${r.status}).</p>`; return; }
-  const bar = `<div class="bar">
-      <a href="#" id="dl">↓ Download</a>
-      <span class="badge">${esc((meta.size_bytes/1024).toFixed(0))} KB</span>
-      <span class="badge">${esc(path)}</span>
-      <span class="badge">updated ${esc((meta.updated_at||"").slice(0,10))}</span>
-    </div>`;
-  if(ext === ".md" || ext === ".txt"){
-    const txt = await r.text();
-    main.innerHTML = `<div class="crumb">${esc(path)}</div>${bar}<article id="art"></article>`;
-    document.getElementById("art").innerHTML = DOMPurify.sanitize(marked.parse(txt));
-  } else if(ext === ".pdf"){
-    const b = await r.blob();
-    main.innerHTML = `<div class="crumb">${esc(path)}</div>${bar}
-      <iframe class="pdf" src="${URL.createObjectURL(b)}"></iframe>`;
-  } else {
-    main.innerHTML = `<div class="crumb">${esc(path)}</div>${bar}
-      <article><p>This file type isn't previewable in the browser. Use Download.</p></article>`;
+/* ---------- Deals (lead to decision) ---------- */
+const STAGES = [["lead", "New leads: call to schedule"], ["appointment_set", "Inspection scheduled"], ["inspected", "Inspected: proposal due"], ["proposal_sent", "Proposal sent: following up"], ["on_hold", "On hold"]];
+async function setStage(id, patch) {
+  need(await sb.from("deals").update(patch).eq("id", id).select("id"));
+  await sb.rpc("run_workflow_checked");
+  render();
+}
+async function vDeals() {
+  const deals = need(await sb.from("deals").select("*, companies(name)").eq("closed", false).order("stage_changed_at", { ascending: true }).limit(300));
+  const tasks = need(await sb.from("tasks").select("deal_id,title,due_date").eq("status", "open").not("deal_id", "is", null).order("due_date", { ascending: true }).limit(500));
+  const next = {}; for (const t of tasks) if (!next[t.deal_id]) next[t.deal_id] = t;
+  const t = today();
+  let h = `<div class="card"><h3>Add a lead</h3><div class="two"><div><label>Business</label><input id="nCo"></div><div><label>Contact name</label><input id="nName"></div></div>
+    <div class="two"><div><label>Phone</label><input id="nPhone" inputmode="tel"></div><div><label>Email</label><input id="nEmail" inputmode="email"></div></div>
+    <label>Complaint or request</label><input id="nWhy"><div class="btns"><button class="b p" id="nAdd">Add lead</button></div></div>`;
+  for (const [st, label] of STAGES) {
+    const list = deals.filter((d) => d.stage === st); if (!list.length) continue;
+    h += `<h2>${label} (${list.length})</h2>` + list.map((d) => { const n = next[d.id]; const days = Math.max(0, Math.round((Date.now() - new Date(d.stage_changed_at)) / 864e5));
+      const who = [d.contact_name, d.contact_phone, d.contact_email].filter(Boolean).join(" · ");
+      let acts = "";
+      if (st === "lead") acts = `<button class="b p" data-open="appt">Appointment set</button>`;
+      if (st === "appointment_set") acts = `<button class="b p" data-go="inspected">Inspection done</button><button class="b" data-open="appt">Reschedule</button>`;
+      if (st === "inspected") acts = `<button class="b p" data-open="prop">Proposal sent</button>`;
+      if (st === "proposal_sent") acts = `<button class="b p" data-go="won">Won</button><button class="b d" data-open="lost">Lost</button>`;
+      acts += st === "on_hold" ? `<button class="b" data-go="lead">Reopen</button>` : `<button class="b" data-go="on_hold">Hold</button>`;
+      return `<div class="card" data-deal="${d.id}"><h3>${esc(d.name)}</h3>${who ? `<div class="meta">${esc(who)}</div>` : ""}${d.complaint ? `<div class="meta">${esc(d.complaint)}</div>` : ""}
+        <div class="chips"><span class="chip">${days} day${days === 1 ? "" : "s"} in stage</span>${d.appointment_at && st === "appointment_set" ? `<span class="chip gold">${new Date(d.appointment_at).toLocaleString(undefined, { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</span>` : ""}${d.price_recurring ? `<span class="chip">$${Number(d.price_recurring).toLocaleString()} ${esc(d.recurring_period || "recurring")}</span>` : ""}</div>
+        <div class="meta">${n ? `Next: ${esc(n.title)} · <span class="${n.due_date < t ? "late" : ""}">${fmt(n.due_date)}</span>` : "No open task"}</div>
+        <div class="btns">${acts}</div>
+        <div class="form hide" data-form="appt"><label>Inspection date and time</label><input type="datetime-local" data-f="appt"><div class="btns"><button class="b p" data-save="appt">Save appointment</button></div></div>
+        <div class="form hide" data-form="prop"><div class="two"><div><label>Sent to (name)</label><input data-f="cn" value="${esc(d.contact_name || "")}"></div><div><label>Email</label><input data-f="ce" value="${esc(d.contact_email || "")}" inputmode="email"></div></div>
+          <label>Services offered</label><input data-f="sv" value="${esc(d.services || "")}">
+          <div class="two"><div><label>Initial price ($)</label><input data-f="pi" inputmode="decimal"></div><div><label>Recurring price ($)</label><input data-f="pr" inputmode="decimal"></div></div>
+          <label>Recurring period</label><select data-f="pp"><option>per month</option><option>per quarter</option><option>per year</option><option>bi-monthly</option><option>per service</option></select>
+          <div class="btns"><button class="b p" data-save="prop">Save: proposal sent</button></div></div>
+        <div class="form hide" data-form="lost"><label>Why was it lost?</label><input data-f="lr"><div class="btns"><button class="b d" data-save="lost">Save: lost</button></div></div></div>`; }).join("");
   }
-  document.getElementById("dl").onclick = async (e) => {
-    e.preventDefault();
-    const rr = await sb(`/storage/v1/object/docs/${path.split("/").map(encodeURIComponent).join("/")}`);
-    const b = await rr.blob();
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(b); a.download = path.split("/").pop();
-    a.click(); URL.revokeObjectURL(a.href);
+  if (!deals.length) h += '<div class="empty">No open deals. Leads from your inbox land here automatically, or add one above.</div>';
+  $("view").innerHTML = h;
+  $("nAdd").onclick = async () => {
+    const name = $("nCo").value.trim(); if (!name) return;
+    const co = need(await sb.from("companies").insert({ name, source: "manual", status: "working" }).select("id"))[0];
+    need(await sb.from("deals").insert({ company_id: co.id, name, contact_name: $("nName").value.trim() || null, contact_phone: $("nPhone").value.trim() || null, contact_email: $("nEmail").value.trim() || null, complaint: $("nWhy").value.trim() || null, source: "manual" }).select("id"));
+    await sb.rpc("run_workflow_checked"); render();
   };
+  $("view").querySelectorAll("[data-deal]").forEach((c) => {
+    const id = c.dataset.deal; const v = (f) => (c.querySelector(`[data-f="${f}"]`).value || "").trim(); const num = (x) => (x === "" || isNaN(Number(x.replace(/[$,]/g, ""))) ? null : Number(x.replace(/[$,]/g, "")));
+    c.querySelectorAll("[data-open]").forEach((b) => (b.onclick = () => c.querySelectorAll("[data-form]").forEach((f) => f.classList.toggle("hide", f.dataset.form !== b.dataset.open))));
+    c.querySelectorAll("[data-go]").forEach((b) => (b.onclick = () => { b.disabled = true; setStage(id, { stage: b.dataset.go }); }));
+    c.querySelectorAll("[data-save]").forEach((b) => (b.onclick = () => {
+      const k = b.dataset.save;
+      if (k === "appt") { if (!v("appt")) return; setStage(id, { stage: "appointment_set", appointment_at: new Date(v("appt")).toISOString() }); }
+      if (k === "prop") setStage(id, { stage: "proposal_sent", contact_name: v("cn") || null, contact_email: v("ce") || null, services: v("sv") || null, price_initial: num(v("pi")), price_recurring: num(v("pr")), recurring_period: v("pp") });
+      if (k === "lost") setStage(id, { stage: "lost", lost_reason: v("lr") || null });
+    }));
+  });
 }
 
-function showApp(user){
-  document.getElementById("login").style.display = "none";
-  document.getElementById("app").style.display = "grid";
-  document.getElementById("who").textContent = user?.email || "";
-  document.getElementById("out").style.display = "inline-block";
-  document.getElementById("setpw").style.display = "inline-block";
-  load();
+/* ---------- Leads (public inspection signals) ---------- */
+async function vLeads() {
+  let q = sb.from("signals").select("*").eq("status", "new").order("signal_date", { ascending: false }).limit(1000);
+  if (leadFilter.county) q = q.eq("county", leadFilter.county);
+  if (leadFilter.kind) q = q.eq("kind", leadFilter.kind);
+  const rows = need(await q);
+  const by = new Map();
+  for (const r of rows) { const k = r.license_number || r.external_id; if (!by.has(k)) by.set(k, []); by.get(k).push(r); }
+  const biz = [...by.values()].sort((a, b) => (b.length - a.length) || String(b[0].signal_date).localeCompare(String(a[0].signal_date)));
+  const opt = (v, cur, label) => `<option value="${v}" ${v === cur ? "selected" : ""}>${label}</option>`;
+  let h = `<div class="filters"><select id="fCounty">${opt("", leadFilter.county, "All counties")}${["Volusia", "Brevard", "Flagler"].map((c) => opt(c, leadFilter.county, c)).join("")}</select>
+    <select id="fKind">${opt("", leadFilter.kind, "Food and lodging")}${opt("pest_citation_food", leadFilter.kind, "Restaurants")}${opt("pest_citation_lodging", leadFilter.kind, "Hotels and lodging")}</select></div>
+    <div class="meta" style="margin:0 2px 10px">${biz.length} businesses cited for pests by state inspectors since July 1. Repeat citations first.</div>`;
+  h += biz.slice(0, 150).map((g) => { const r = g[0]; const lodging = r.kind === "pest_citation_lodging";
+    const addr = [r.address, r.city, "FL", r.zip].filter(Boolean).join(", ");
+    return `<div class="card"><h3>${esc(r.business_name)}</h3><div class="meta">${esc(addr)} &middot; ${esc(r.county)}</div>
+      <div class="chips">${g.length > 1 ? `<span class="chip hot">${g.length} citations</span>` : ""}<span class="chip ${lodging ? "gold" : ""}">${lodging ? "Lodging" : "Food service"}</span><span class="chip">Last: ${fmt(r.signal_date)}</span>${(r.detail && Number(r.detail.high_priority_violations) > 0) ? `<span class="chip">${esc(r.detail.high_priority_violations)} high priority</span>` : ""}</div>
+      <div class="meta">${esc((r.detail && r.detail.inspection_type) || "")}${r.detail && r.detail.disposition ? " &middot; " + esc(r.detail.disposition) : ""}</div>
+      <div class="btns"><button class="b p" data-conv="${esc(r.license_number || "")}" data-x="${esc(r.external_id)}">Add as prospect</button><a class="b" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.business_name + " " + addr)}">Map</a><button class="b d" data-dis="${esc(r.license_number || "")}" data-x="${esc(r.external_id)}">Dismiss</button></div></div>`; }).join("");
+  if (!biz.length) h += '<div class="empty">No new leads for this filter.</div>';
+  if (biz.length > 150) h += `<div class="empty">Showing the first 150 of ${biz.length}. Use the filters to narrow.</div>`;
+  $("view").innerHTML = h;
+  $("fCounty").onchange = (e) => { leadFilter.county = e.target.value; render(); };
+  $("fKind").onchange = (e) => { leadFilter.kind = e.target.value; render(); };
+  const groupOf = (b) => by.get(b.dataset.conv || b.dataset.dis || b.dataset.x) || [];
+  $("view").querySelectorAll("[data-conv]").forEach((b) => (b.onclick = async () => {
+    const g = groupOf(b); const r = g[0]; if (!r) return; b.disabled = true;
+    const lodging = r.kind === "pest_citation_lodging";
+    let co;
+    if (r.license_number) co = need(await sb.from("companies").select("id").eq("dbpr_license", r.license_number).limit(1))[0];
+    if (!co) co = need(await sb.from("companies").insert({ name: r.business_name, address: r.address, city: r.city, zip: r.zip, county: r.county, business_type: lodging ? "lodging" : "food service", source: "dbpr", dbpr_license: r.license_number || null, notes: `${g.length} state pest citation(s) since July 1; latest ${r.signal_date}.` }).select("id"))[0];
+    need(await sb.from("signals").update({ status: "converted", company_id: co.id }).in("id", g.map((x) => x.id)).select("id"));
+    render();
+  }));
+  $("view").querySelectorAll("[data-dis]").forEach((b) => (b.onclick = async () => {
+    const g = groupOf(b); if (!g.length) return; b.disabled = true;
+    need(await sb.from("signals").update({ status: "dismissed" }).in("id", g.map((x) => x.id)).select("id"));
+    render();
+  }));
 }
 
-(async () => {
-  const {createClient} = await import("https://esm.sh/@supabase/supabase-js@2");
-  client = createClient(SB_URL, SB_KEY);
-  const {data:{session}} = await client.auth.getSession();
-  if(session) showApp(session.user);
-  document.getElementById("out").onclick = async () => { await client.auth.signOut(); location.reload(); };
-  const say=(t,bad)=>{const m=document.getElementById("lmsg");m.className="msg"+(bad?" err":"");m.textContent=t;};
-  document.getElementById("send").onclick = async () => {
-    const email=document.getElementById("email").value.trim();
-    const pw=document.getElementById("pw").value;
-    if(!email){ say("Enter your email.",1); return; }
-    if(pw){
-      const {error}=await client.auth.signInWithPassword({email,password:pw});
-      say(error?error.message:"Signing in…",!!error);
-    }else{
-      const {error}=await client.auth.signInWithOtp({email});
-      say(error?error.message:"Check your inbox for the 6-digit code.",!!error);
-    }
-  };
-  document.getElementById("ver").onclick = async () => {
-    const email=document.getElementById("email").value.trim();
-    const token=document.getElementById("code").value.trim();
-    if(!email||!token){ say("Enter your email and the code.",1); return; }
-    const {error}=await client.auth.verifyOtp({email,token,type:"email"});
-    if(error) say(error.message,1);
-  };
-  document.getElementById("setpw").onclick = async () => {
-    const p=prompt("Choose a password for this account (min 8 characters):");
-    if(!p) return;
-    const {error}=await client.auth.updateUser({password:p});
-    alert(error?error.message:"Password set. Next time, sign in with email + password.");
-  };
-  document.getElementById("q").oninput = renderTree;
-  client.auth.onAuthStateChange((_e, s) => { if(s) showApp(s.user); });
-})();
+/* ---------- Approvals (email drafts) ---------- */
+async function vDrafts() {
+  const rows = need(await sb.from("drafts").select("*, companies(name)").in("status", ["pending", "approved", "in_mail_drafts"]).order("created_at", { ascending: false }).limit(100));
+  if (!rows.length) { $("view").innerHTML = '<div class="empty">No drafts waiting. Emails written for you will appear here for approval before anything is sent.</div>'; return; }
+  $("view").innerHTML = rows.map((d) => `<div class="card" data-id="${d.id}"><div class="chips"><span class="chip ${d.status === "pending" ? "gold" : ""}">${esc(d.status.replace(/_/g, " "))}</span>${d.companies ? `<span class="chip">${esc(d.companies.name)}</span>` : ""}${d.purpose ? `<span class="chip">${esc(d.purpose)}</span>` : ""}</div>
+    <label>To</label><input data-f="to_email" value="${esc(d.to_email || "")}" inputmode="email">
+    <label>Subject</label><input data-f="subject" value="${esc(d.subject)}">
+    <label>Message</label><textarea data-f="body">${esc(d.body)}</textarea>
+    <div class="btns"><button class="b p" data-a="mail">Open in Mail</button><button class="b" data-a="save">Save edits</button><button class="b" data-a="sent">Mark sent</button><button class="b d" data-a="reject">Reject</button></div>
+    <div class="meta" style="margin-top:8px">Open in Mail fills in your mail app with the HubSpot tracking address in BCC. You send it yourself.</div></div>`).join("");
+  $("view").querySelectorAll(".card").forEach((c) => {
+    const val = (f) => c.querySelector(`[data-f="${f}"]`).value;
+    const save = (extra) => sb.from("drafts").update(Object.assign({ to_email: val("to_email") || null, subject: val("subject"), body: val("body") }, extra || {})).eq("id", c.dataset.id).select("id");
+    c.querySelectorAll("[data-a]").forEach((b) => (b.onclick = async () => {
+      const a = b.dataset.a;
+      if (a === "save") { need(await save()); b.textContent = "Saved"; return; }
+      if (a === "mail") { need(await save({ status: "approved" })); location.href = `mailto:${encodeURIComponent(val("to_email"))}?bcc=${encodeURIComponent(BCC)}&subject=${encodeURIComponent(val("subject"))}&body=${encodeURIComponent(val("body"))}`; return; }
+      if (a === "sent") need(await save({ status: "sent" }));
+      if (a === "reject") need(await save({ status: "rejected" }));
+      render();
+    }));
+  });
+}
+
+/* ---------- HubSpot notes and tasks: approve before anything is entered ---------- */
+const HUB_LABEL = { note: "Note", task: "Task", call: "Call log", email: "Email log", meeting: "Meeting log", stage_change: "Stage change", contact: "New contact", company: "New company", deal: "New deal" };
+async function vHub() {
+  const rows = need(await sb.from("hubspot_queue").select("*, companies(name)").in("status", ["pending", "approved"]).order("created_at", { ascending: true }).limit(200));
+  if (!rows.length) { $("view").innerHTML = '<div class="empty">Nothing waiting. Notes and tasks drafted for HubSpot appear here for your approval first.</div>'; return; }
+  const card = (r) => { const isTask = r.record_type === "task"; const co = r.company_name || (r.companies && r.companies.name) || ""; const approved = r.status === "approved";
+    return `<div class="card" data-hub="${r.id}"><div class="chips"><span class="chip gold">${esc(HUB_LABEL[r.record_type] || r.record_type)}</span>${approved ? '<span class="chip">approved</span>' : ""}</div>
+      <div class="meta"><b>Company:</b> ${esc(co || "not set")} &nbsp; <b>Contact:</b> ${esc(r.contact_name || "not set")}</div>
+      <div class="meta"><b>Deal:</b> ${esc(r.deal_name || "not set")}${r.hubspot_url ? ` &middot; <a href="${esc(r.hubspot_url)}" target="_blank" rel="noopener">open in HubSpot</a>` : ""}</div>
+      ${isTask ? `<label>Task title</label><input data-f="title" value="${esc(r.title || "")}">
+        <div class="two"><div><label>Due date</label><input type="date" data-f="due_date" value="${esc(r.due_date || "")}"></div><div><label>Task type</label><select data-f="task_type">${["To-do", "Call", "Email"].map((o) => `<option ${o === (r.task_type || "To-do") ? "selected" : ""}>${o}</option>`).join("")}</select></div></div>
+        <label>Priority</label><select data-f="priority">${["None", "Low", "Medium", "High"].map((o) => `<option ${o === (r.priority || "None") ? "selected" : ""}>${o}</option>`).join("")}</select>` : ""}
+      <label>${isTask ? "Notes" : "Text"}</label><textarea data-f="paste_text" style="min-height:110px">${esc(r.paste_text)}</textarea>
+      <div class="btns">${approved ? "" : '<button class="b p" data-a="approve">Approve</button>'}<button class="b" data-a="save">Save edits</button><button class="b" data-a="copy">Copy</button><button class="b" data-a="logged">Mark logged</button><button class="b d" data-a="reject">Reject</button></div></div>`; };
+  const pend = rows.filter((r) => r.status === "pending"), appr = rows.filter((r) => r.status === "approved");
+  $("view").innerHTML = (pend.length ? `<h2>Waiting for your approval (${pend.length})</h2>` + pend.map(card).join("") : "") + (appr.length ? `<h2>Approved, not yet in HubSpot (${appr.length})</h2>` + appr.map(card).join("") : "");
+  $("view").querySelectorAll("[data-hub]").forEach((c) => {
+    const get = (f) => { const e = c.querySelector(`[data-f="${f}"]`); return e ? e.value : undefined; };
+    const fields = () => { const o = { paste_text: get("paste_text") }; for (const f of ["title", "due_date", "task_type", "priority"]) { const v = get(f); if (v !== undefined) o[f] = v === "" ? null : v; } return o; };
+    const save = (extra) => sb.from("hubspot_queue").update(Object.assign(fields(), extra || {})).eq("id", c.dataset.hub).select("id");
+    c.querySelectorAll("[data-a]").forEach((b) => (b.onclick = async () => { const a = b.dataset.a;
+      if (a === "copy") { await navigator.clipboard.writeText(get("paste_text")); b.textContent = "Copied"; return; }
+      if (a === "save") { need(await save()); b.textContent = "Saved"; return; }
+      if (a === "approve") need(await save({ status: "approved", approved_at: new Date().toISOString() }));
+      if (a === "logged") need(await save({ status: "logged", logged_at: new Date().toISOString() }));
+      if (a === "reject") need(await save({ status: "rejected" }));
+      render(); }));
+  });
+}
+
+/* ---------- Prospects ---------- */
+const STATUSES = ["prospect", "working", "nurture", "client", "past_client", "do_not_contact"];
+async function vProspects() {
+  let q = sb.from("companies").select("*").order("updated_at", { ascending: false }).limit(300);
+  if (prospectFilter) q = q.eq("status", prospectFilter);
+  const rows = need(await q);
+  let h = `<div class="filters"><select id="pF"><option value="">All statuses</option>${STATUSES.map((s) => `<option value="${s}" ${s === prospectFilter ? "selected" : ""}>${s.replace(/_/g, " ")}</option>`).join("")}</select></div>`;
+  h += rows.length ? rows.map((c) => `<div class="card"><h3>${esc(c.name)}</h3><div class="meta">${esc([c.address, c.city, c.county].filter(Boolean).join(", "))}${c.business_type ? " &middot; " + esc(c.business_type) : ""}</div>
+    ${c.notes ? `<div class="meta" style="margin-top:4px">${esc(c.notes)}</div>` : ""}
+    <div class="btns"><select data-st="${c.id}" style="width:auto">${STATUSES.map((s) => `<option value="${s}" ${s === c.status ? "selected" : ""}>${s.replace(/_/g, " ")}</option>`).join("")}</select><button class="b" data-task="${c.id}" data-n="${esc(c.name)}">Add follow-up</button></div></div>`).join("") : '<div class="empty">No prospects yet. Add some from the Leads tab.</div>';
+  $("view").innerHTML = h;
+  $("pF").onchange = (e) => { prospectFilter = e.target.value; render(); };
+  $("view").querySelectorAll("[data-st]").forEach((s) => (s.onchange = async () => { need(await sb.from("companies").update({ status: s.value }).eq("id", s.dataset.st).select("id")); }));
+  $("view").querySelectorAll("[data-task]").forEach((b) => (b.onclick = async () => {
+    need(await sb.from("tasks").insert({ title: "Follow up: " + b.dataset.n, kind: "follow_up", company_id: b.dataset.task, due_date: today() }).select("id"));
+    b.textContent = "Added for today";
+  }));
+}
+/* ---------- Docs (the document library) ---------- */
+const REPO_NAME = { q4: "Q4 Reengagement", prospecting: "Prospecting", brain: "Turner Brain" };
+let DOCS = null, docQ = "", docPath = null;
+async function vDocs() {
+  if (!DOCS) {
+    DOCS = need(await sb.from("documents").select("path,repo,title,category,ext,size_bytes,updated_at").order("repo").order("category").order("title").limit(2000));
+    counts.docs = DOCS.length; drawNav();
+  }
+  if (docPath) return vDocOpen();
+  $("view").innerHTML = `<div class="card"><input id="dQ" placeholder="Search ${DOCS.length} documents..." value="${esc(docQ)}"></div><div id="dList" class="dlist"></div>`;
+  drawDocList();
+  $("dQ").oninput = (e) => { docQ = e.target.value; drawDocList(); };
+  $("dQ").onkeydown = (e) => { if (e.key === "Escape") { docQ = ""; e.target.value = ""; drawDocList(); } };
+}
+function drawDocList() {
+  const q = docQ.trim().toLowerCase();
+  const list = q ? DOCS.filter((d) => (d.title + " " + d.path).toLowerCase().includes(q)) : DOCS;
+  let h = "", cur = null;
+  for (const d of list) {
+    if (d.repo !== cur) { cur = d.repo; h += `<h2>${esc(REPO_NAME[d.repo] || d.repo)}</h2>`; }
+    h += `<div class="doc" data-p="${esc(d.path)}">${esc(d.title)}<span class="ex">${esc((d.ext || "").replace(".", ""))}</span></div>`;
+  }
+  if (q) h = `<h2>${list.length} match${list.length === 1 ? "" : "es"}</h2>` + h;
+  if (!list.length) h = '<div class="empty">No matches.</div>';
+  $("dList").innerHTML = h;
+  $("dList").querySelectorAll("[data-p]").forEach((el) => (el.onclick = () => { docPath = el.dataset.p; render(); }));
+}
+async function vDocOpen() {
+  const meta = (DOCS || []).find((d) => d.path === docPath) || {};
+  const { data } = await sb.auth.getSession();
+  const tok = data && data.session ? data.session.access_token : SB_KEY;
+  const url = `${SB_URL}/storage/v1/object/docs/${docPath.split("/").map(encodeURIComponent).join("/")}`;
+  const grab = () => fetch(url, { headers: { apikey: SB_KEY, Authorization: `Bearer ${tok}` } });
+  const ext = (meta.ext || docPath.slice(docPath.lastIndexOf(".")) || "").toLowerCase();
+  let h = `<div class="btns"><button class="b" id="dBack">&larr; All documents</button><button class="b p" id="dDl">Download</button></div>
+    <div class="meta" style="margin:8px 2px 6px">${esc(docPath)}${meta.size_bytes ? " &middot; " + Math.round(meta.size_bytes / 1024) + " KB" : ""}</div>`;
+  const r = await grab();
+  if (!r.ok) {
+    h += `<div class="empty">Could not load this file (HTTP ${r.status}).</div>`;
+    $("view").innerHTML = h; return wire();
+  }
+  if (ext === ".md" || ext === ".txt") h += `<article class="md">${DOMPurify.sanitize(marked.parse(await r.text()))}</article>`;
+  else if (ext === ".pdf") h += `<iframe class="pdf" src="${URL.createObjectURL(await r.blob())}"></iframe>`;
+  else h += '<div class="empty">This file type cannot be previewed here &mdash; use Download.</div>';
+  $("view").innerHTML = h;
+  wire();
+  function wire() {
+    $("dBack").onclick = () => { docPath = null; render(); };
+    $("dDl").onclick = async () => {
+      const rr = await grab();
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(await rr.blob());
+      a.download = docPath.split("/").pop();
+      a.click(); URL.revokeObjectURL(a.href);
+    };
+  }
+}
+
+boot();
 </script>
 </body>
 </html>
